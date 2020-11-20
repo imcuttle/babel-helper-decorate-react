@@ -20,7 +20,7 @@ yarn add babel-helper-decorate-react
 ## Usage
 
 ```javascript
-import babelPluginDecorateReact = from 'babel-helper-decorate-react'
+import decorateReact from 'babel-helper-decorate-react'
 ```
 
 ## Contributing
