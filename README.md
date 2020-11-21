@@ -49,6 +49,62 @@ export class Button2 extends React.Component {
 }
 ```
 
+## Why?
+
+It's useful for decorate react component for react component, like use mobx-react `observer`.
+
+### `babelConfig`
+
+```diff
+{
+  plugins: [
+  +  'babel-helper-decorate-react/mobx'
+  ]
+}
+```
+
+### `babel-helper-decorate-react/mobx/decorate`
+
+```js
+const mobx = require('mobx-react')
+
+module.exports = () => {
+  return (Component) => {
+    return mobx.observer(Component)
+  }
+}
+```
+
+### `Input`
+
+```jsx
+export const Button = () => {
+  return <button>button</button>
+}
+
+export default class ButtonDefault extends React.Component {
+  // ...
+}
+```
+
+### Output
+
+```jsx
+import decorate from 'babel-helper-decorate-react/mobx/decorate'
+
+// To be observer component
+export const Button = decorate()(() => {
+  return <button>button</button>
+})
+
+// To be observer component
+export default
+@decorate()
+class ButtonDefault extends React.Component {
+  // ...
+}
+```
+
 ## Installation
 
 ```bash

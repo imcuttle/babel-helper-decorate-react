@@ -28,6 +28,7 @@
     "node": ">=10"
   },
   "files": [
+    "mobx",
     "es",
     "types",
     "lib",
@@ -82,10 +83,13 @@
     "escape-string-regexp": "^4.0.0",
     "husky": "^4.3.0",
     "jest": "^26.6.3",
+    "mobx": "^6.0.4",
+    "mobx-react": "^7.0.5",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.2.0",
     "pretty-quick": "^3.1.0",
     "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "react-test-renderer": "^17.0.1",
     "rimraf": "^3.0.2",
     "ts-jest": "^26.4.4",

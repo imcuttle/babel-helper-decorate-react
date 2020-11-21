@@ -17,6 +17,8 @@ const runCode = (code) => {
   return mod.exports
 }
 
+const projectRoot = nps.join(__dirname, '..')
+
 describe('demo', () => {
   const root = nps.join(__dirname, 'lib')
 
@@ -37,10 +39,10 @@ describe('demo', () => {
           plugins: [nps.join(root, name, 'index.js'), '@babel/plugin-syntax-jsx']
         }).code
 
-        const stripOutput = es6Output.replace(new RegExp(escape(root), 'g'), '<rootDir>')
+        const stripOutput = es6Output.replace(new RegExp(escape(projectRoot), 'g'), '<rootDir>')
         expect(stripOutput).toMatchSnapshot(`DemoEs6Code-${name}-${subName}`)
 
-        expect(output.replace(new RegExp(escape(root), 'g'), '<rootDir>')).toMatchSnapshot(
+        expect(output.replace(new RegExp(escape(projectRoot), 'g'), '<rootDir>')).toMatchSnapshot(
           `DemoCode-${name}-${subName}`
         )
 
