@@ -31,7 +31,7 @@ const visit = (code, opts?: Parameters<typeof createDecorateReactVisitor>[0]) =>
     plugins: [
       {
         manipulateOptions(opts: any, parserOpts: any): void {
-          parserOpts.plugins.push('jsx', 'decorate')
+          parserOpts.plugins.push('jsx', 'decorators-legacy')
         },
         visitor: createDecorateReactVisitor({ moduleInteropPath: null, decorateLibPath: '/decorateLibPath/', ...opts })
       }
@@ -104,7 +104,8 @@ const n = () => {
 export const xx = n(function b() {
 })
 
-export default class XButton extends Component {
+
+export default @noop class XButton extends Component {
   render() {
     return null;
   }
@@ -127,7 +128,8 @@ export default class XButton extends Component {
       });
 
       export const xx = n(function b() {});
-      export default @_decorate(null)
+      export default @noop
+      @_decorate(null)
       class XButton extends Component {
         render() {
           return null;

@@ -85,7 +85,7 @@ export class RangesHelper {
 
     let dataExp = tpl.expression(JSON.stringify(data || null))()
     if ('ClassDeclaration' === path.node.type) {
-      path.node.decorators = path.node.decoraters || []
+      path.node.decorators = path.node.decorators || []
       path.node.decorators.push(types.decorator(types.callExpression(importName, [dataExp])))
     } else {
       path.replaceWith(types.callExpression(types.callExpression(importName, [dataExp]), [path.node]))
