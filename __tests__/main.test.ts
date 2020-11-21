@@ -4,17 +4,17 @@
  * @date 2018/4/4
  */
 import * as nps from 'path'
-import createDecorateReactVisitor, { createDecorateReactTopJSXVistor } from '../src'
+import createDecorateReactVisitor, { createDecorateReactTopJSXVisitor } from '../src'
 import * as babel from '@babel/core'
 import { fixture } from './helper'
 
-const visitJSX = (code, opts?: Parameters<typeof createDecorateReactTopJSXVistor>[0]) => {
+const visitJSX = (code, opts?: Parameters<typeof createDecorateReactTopJSXVisitor>[0]) => {
   const prePlugins = [
     {
       manipulateOptions(opts: any, parserOpts: any): void {
         parserOpts.plugins.push('jsx', 'decorate')
       },
-      visitor: createDecorateReactTopJSXVistor({
+      visitor: createDecorateReactTopJSXVisitor({
         moduleInteropPath: null,
         decorateLibPath: '/decorateLibPath/',
         ...opts

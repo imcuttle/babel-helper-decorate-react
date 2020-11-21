@@ -36,7 +36,7 @@ export const defaultReactClassSuperTokens = []
   defaultReactClassCallTokens.push(name.split('.')[1])
 })
 
-export const defaultReactHookCallTokens = defaultReactClassCallTokens.slice()
+export const defaultReactFunctionCallTokens = defaultReactClassCallTokens.slice()
 ;[
   'React.useCallback',
   'React.useEffect',
@@ -49,15 +49,15 @@ export const defaultReactHookCallTokens = defaultReactClassCallTokens.slice()
   'React.useDebugValue',
   'React.useRef'
 ].forEach((name) => {
-  defaultReactHookCallTokens.push(name)
-  defaultReactHookCallTokens.push(name.split('.')[1])
+  defaultReactFunctionCallTokens.push(name)
+  defaultReactFunctionCallTokens.push(name.split('.')[1])
 })
 
 function createDecorateReactVisitor({
   reactClassSuperTokens = defaultReactClassSuperTokens,
   reactClassMethodsTokens = defaultReactClassMethodsTokens,
   reactClassCallTokens = defaultReactClassCallTokens,
-  reactHookCallTokens = defaultReactHookCallTokens,
+  reactFunctionCallTokens = defaultReactFunctionCallTokens,
   reactClassMemberTokens = defaultReactClassMemberTokens,
   detectClassComponent = true,
   detectFunctionComponent = true,
@@ -66,8 +66,9 @@ function createDecorateReactVisitor({
   reactClassSuperTokens?: string[]
   reactClassMethodsTokens?: string[]
   reactClassCallTokens?: string[]
-  reactHookCallTokens?: string[]
   reactClassMemberTokens?: string[]
+
+  reactFunctionCallTokens?: string[]
   detectClassComponent?: boolean
   detectFunctionComponent?: boolean
 }) {
@@ -121,7 +122,7 @@ function createDecorateReactVisitor({
           } else {
             path.traverse({
               CallExpression(path) {
-                if (reactHookCallTokens.some((token) => isMemberExpression(path.get('callee'), token))) {
+                if (reactFunctionCallTokens.some((token) => isMemberExpression(path.get('callee'), token))) {
                   isMatched = true
                   path.stop()
                 }

@@ -6,7 +6,7 @@
 import * as React from 'react'
 import * as nps from 'path'
 import * as Module from 'module'
-import createDecorateReactVisitor, { createDecorateReactTopJSXVistor } from '../src'
+import createDecorateReactVisitor, { createDecorateReactTopJSXVisitor } from '../src'
 import * as babel from '@babel/core'
 import * as TestRenderer from 'react-test-renderer'
 
@@ -51,7 +51,7 @@ const runInjectIdCode = (code) => {
             transformData: () => `id-react-${id++}`,
             detectFunctionComponent: false
           })
-          const result2 = createDecorateReactTopJSXVistor({
+          const result2 = createDecorateReactTopJSXVisitor({
             decorateLibPath: nps.join(__dirname, 'lib/inject/jsx.js'),
             transformData: () => `id-jsx-${id++}`,
             detectClassComponent: false
