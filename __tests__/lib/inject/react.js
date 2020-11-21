@@ -7,7 +7,6 @@ module.exports = (id) => {
       return class extends Component {
         render() {
           const element = super.render()
-          // console.log(element)
           return React.cloneElement(element, {
             'data-id': id
           })

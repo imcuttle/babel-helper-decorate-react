@@ -48,11 +48,13 @@ const runInjectIdCode = (code) => {
         Program(path) {
           const result = createDecorateReactVisitor({
             decorateLibPath: nps.join(__dirname, 'lib/inject/react.js'),
-            transformData: () => `id-react-${id++}`
+            transformData: () => `id-react-${id++}`,
+            detectFunctionComponent: false
           })
           const result2 = createDecorateReactTopJSXVistor({
             decorateLibPath: nps.join(__dirname, 'lib/inject/jsx.js'),
-            transformData: () => `id-jsx-${id++}`
+            transformData: () => `id-jsx-${id++}`,
+            detectClassComponent: false
           })
 
           result.Program(path)
@@ -117,10 +119,14 @@ export class Button2 extends React.Component {
     const buttonRender = TestRenderer.create(<Button />)
     const button2Render = TestRenderer.create(<Button2 />)
 
-    expect(buttonRender.toJSON()).toMatchInlineSnapshot(`<div />`)
+    expect(buttonRender.toJSON()).toMatchInlineSnapshot(`
+      <div
+        data-id="id-jsx-2"
+      />
+    `)
     expect(button2Render.toJSON()).toMatchInlineSnapshot(`
       <div
-        data-id="id-react-2"
+        data-id="id-react-1"
       >
         hahaha
       </div>
