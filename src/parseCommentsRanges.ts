@@ -62,7 +62,10 @@ export class RangesEater {
   parseArgument(value: string, reg: RegExp) {
     const result = value.match(reg)
     const ruleText = ((result && result[1]) || '').trim()
-    return this.opts.parseArgument(ruleText)
+    if (this.opts.parseArgument) {
+      return this.opts.parseArgument(ruleText)
+    }
+    return ruleText
   }
 
   eatBlock(value: string, location: any) {
@@ -101,7 +104,7 @@ export class RangesEater {
     const handleLine = (delta, data, RangeClass) => {
       const last = this.lastRange
       if (!last || last.end !== Infinity) {
-        this.ranges.push(new DisableRange(location.start.line + delta, location.end.line + delta, data))
+        this.ranges.push(new RangeClass(location.start.line + delta, location.end.line + delta, data))
       } else {
         let newData
         if (RangeClass === last.constructor) {

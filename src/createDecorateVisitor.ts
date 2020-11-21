@@ -28,11 +28,11 @@ export type CreateDecorateVisitorOpts = Partial<CreateDisabledScopesOptions> & {
   deepVisitorTypes?: VisitorConfig[]
   exportVisitorTypes?: string[]
   transformData?: TransformDataFn
-  importType?: 'default' | 'namespace'
   ExportDefaultDeclaration?: boolean
   ExportNamedDeclaration?: boolean
   decorateLibPath?: string
   defaultEnable?: boolean
+  moduleInteropPath?: string
 }
 
 export class RangesHelper {
@@ -60,12 +60,15 @@ export class RangesHelper {
     decorated.push(this.opts.libPath)
 
     if (!this.importName) {
-      if (this.opts.importType === 'default') {
-        this.importName = addDefault(path, this.opts.libPath)
-      } else {
-        this.importName = addNamespace(path, this.opts.libPath)
+      const moduleInteropPath = this.opts.moduleInteropPath
+      this.importName = addDefault(path, this.opts.libPath)
+
+      if (moduleInteropPath) {
+        const moduleInterop = addDefault(path, moduleInteropPath)
+        this.importName = types.callExpression(moduleInterop, [this.importName])
       }
     }
+    // this.importName
     const importName = this.importName
 
     if (transformData) {
@@ -112,9 +115,9 @@ export class RangesHelper {
 function createDecorateVisitor({
   prefix = 'decorate',
   decorateLibPath,
+  moduleInteropPath = require.resolve('module-interop'),
   visitorTypes = ['FunctionExpression', 'ArrowFunctionExpression', 'ClassExpression', 'ClassDeclaration'],
   deepVisitorTypes = visitorTypes,
-  importType = 'default',
   exportVisitorTypes = ['ExportDefaultDeclaration', 'ExportNamedDeclaration'],
   defaultEnable = true,
   transformData,
@@ -127,16 +130,14 @@ function createDecorateVisitor({
     throw new Error('`decorateLibPath` is required')
   }
 
-  const helper = new RangesHelper({ importType, libPath: decorateLibPath, defaultEnable })
-
   const reduceVisitors = (types: VisitorConfig[]) =>
     types.reduce((acc: any, name) => {
       if (typeof name === 'string') {
-        acc[name] = function (path) {
+        acc[name] = function (path, { helper }) {
           helper.inject(path)
         }
       } else {
-        acc[name.type] = function (path) {
+        acc[name.type] = function (path, { helper }) {
           const transform = name.transformData || transformData
           if (!name.condition) {
             helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
@@ -152,18 +153,29 @@ function createDecorateVisitor({
   const _visitors = reduceVisitors(visitorTypes)
 
   let exportVisitors = exportVisitorTypes.reduce((acc: any, name) => {
-    acc[name] = function (path) {
-      path.traverse(deepVisitors, {})
+    acc[name] = function (path, state) {
+      path.traverse(deepVisitors, state)
     }
     return acc
   }, {})
 
   return {
-    ..._visitors,
-    ...exportVisitors,
     Program(path) {
+      const helper = new RangesHelper({
+        moduleInteropPath,
+        libPath: decorateLibPath,
+        defaultEnable
+      })
       helper.babelPass = this
       helper.ranges = parseCommentsRanges(path.container.comments, { prefix, ...opts })
+
+      path.traverse(
+        {
+          ..._visitors,
+          ...exportVisitors
+        },
+        { helper }
+      )
     }
   }
 }
