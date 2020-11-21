@@ -80,7 +80,7 @@ babel.transform(code, {
 
 #### `Options`
 
-extends [createDecorateVisitor#Options](#options2)
+extends [createDecorateVisitor#Options](#options-1)
 
 ##### `detectClassComponent`
 
