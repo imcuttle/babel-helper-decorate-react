@@ -82,6 +82,12 @@ export const Button = () => {
   return <button>button</button>
 }
 
+/* mobx-observer-disable */
+export const ButtonDisable = () => {
+  return <button>button</button>
+}
+/* mobx-observer-enable */
+
 export default class ButtonDefault extends React.Component {
   // ...
 }
@@ -96,6 +102,10 @@ import decorate from 'babel-helper-decorate-react/mobx/decorate'
 export const Button = decorate()(() => {
   return <button>button</button>
 })
+
+export const ButtonDisable = () => {
+  return <button>button</button>
+}
 
 // To be observer component
 export default
