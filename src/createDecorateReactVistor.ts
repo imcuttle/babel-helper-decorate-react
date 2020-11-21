@@ -72,83 +72,87 @@ function createDecorateReactVisitor({
   detectClassComponent?: boolean
   detectFunctionComponent?: boolean
 }) {
-  return createDecorateVisitor({
-    ...options,
-    visitorTypes: [
-      detectFunctionComponent && 'FunctionExpression|ArrowFunctionExpression',
-      detectClassComponent && 'ClassExpression|ClassDeclaration'
-    ]
-      .filter(Boolean)
-      .map((name) => ({
-        type: name,
-        condition: (path, helper) => {
-          let isMatched = false
-          if (name === 'ClassExpression|ClassDeclaration') {
-            if (reactClassSuperTokens.some((token) => isMemberExpression(path.get('superClass'), token))) {
-              path.stop()
-              return true
-            }
-
-            path.traverse({
-              ClassMethod(path) {
-                if (reactClassMethodsTokens.some((token) => isMemberExpression(path.get('key'), token))) {
-                  isMatched = true
-                  path.stop()
-                }
-              },
-              CallExpression(path) {
-                if (reactClassCallTokens.some((token) => isMemberExpression(path.get('callee'), token))) {
-                  isMatched = true
-                  path.stop()
-                }
-              },
-              // @ts-ignore
-              ['MemberExpression|Identifier'](path) {
-                if (reactClassMemberTokens.some((token) => isMemberExpression(path, token))) {
-                  isMatched = true
-                  path.stop()
-                }
-                path.skip()
-              },
-              JSXElement(path) {
-                isMatched = true
-                path.stop()
-              },
-              JSXFragment(path) {
-                isMatched = true
-                path.stop()
-              }
-            })
-          } else {
-            path.traverse({
-              CallExpression(path) {
-                if (reactFunctionCallTokens.some((token) => isMemberExpression(path.get('callee'), token))) {
-                  isMatched = true
-                  path.stop()
-                }
-              },
-              // @ts-ignore
-              ['MemberExpression|Identifier'](path) {
-                if (reactClassMemberTokens.some((token) => isMemberExpression(path, token))) {
-                  isMatched = true
-                  path.stop()
-                }
-                path.skip()
-              },
-              JSXElement(path) {
-                isMatched = true
-                path.stop()
-              },
-              JSXFragment(path) {
-                isMatched = true
-                path.stop()
-              }
-            })
+  const vTypes = [
+    detectFunctionComponent && 'FunctionExpression',
+    detectFunctionComponent && 'ArrowFunctionExpression',
+    detectClassComponent && 'ClassExpression|ClassDeclaration'
+  ]
+    .filter(Boolean)
+    .map((name) => ({
+      type: name,
+      condition: (path, helper) => {
+        let isMatched = false
+        if (name === 'ClassExpression|ClassDeclaration') {
+          if (reactClassSuperTokens.some((token) => isMemberExpression(path.get('superClass'), token))) {
+            path.stop()
+            return true
           }
 
-          return isMatched
+          path.traverse({
+            ClassMethod(path) {
+              if (reactClassMethodsTokens.some((token) => isMemberExpression(path.get('key'), token))) {
+                isMatched = true
+                path.stop()
+              }
+            },
+            CallExpression(path) {
+              if (reactClassCallTokens.some((token) => isMemberExpression(path.get('callee'), token))) {
+                isMatched = true
+                path.stop()
+              }
+            },
+            // @ts-ignore
+            ['MemberExpression|Identifier'](path) {
+              if (reactClassMemberTokens.some((token) => isMemberExpression(path, token))) {
+                isMatched = true
+                path.stop()
+              }
+              path.skip()
+            },
+            JSXElement(path) {
+              isMatched = true
+              path.stop()
+            },
+            JSXFragment(path) {
+              isMatched = true
+              path.stop()
+            }
+          })
+        } else {
+          path.traverse({
+            CallExpression(path) {
+              if (reactFunctionCallTokens.some((token) => isMemberExpression(path.get('callee'), token))) {
+                isMatched = true
+                path.stop()
+              }
+            },
+            // @ts-ignore
+            ['MemberExpression|Identifier'](path) {
+              if (reactClassMemberTokens.some((token) => isMemberExpression(path, token))) {
+                isMatched = true
+                path.stop()
+              }
+              path.skip()
+            },
+            JSXElement(path) {
+              isMatched = true
+              path.stop()
+            },
+            JSXFragment(path) {
+              isMatched = true
+              path.stop()
+            }
+          })
         }
-      }))
+
+        return isMatched
+      }
+    }))
+
+  return createDecorateVisitor({
+    deepVisitorTypes: vTypes,
+    visitorTypes: vTypes,
+    ...options
   })
 }
 

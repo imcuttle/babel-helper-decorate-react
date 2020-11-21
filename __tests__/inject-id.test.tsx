@@ -68,11 +68,11 @@ const runInjectIdCode = (code) => {
 describe('createDecorateReactVisitor-inject', function () {
   it('should injectId', function () {
     let id = 1
-    const { Button2, Button } = runCode(
+    const { default: Button2, Button } = runCode(
       `
 import * as React from 'react'
 export const Button = (props) => <div {...props}></div>
-export class Button2 extends React.Component {
+export default class Button2 extends React.Component {
     render() {
         return <div {...this.props}>hahaha</div>
     }
@@ -104,11 +104,11 @@ export class Button2 extends React.Component {
   })
 
   it('should injectId combine', function () {
-    const { Button2, Button } = runInjectIdCode(
+    const { default: Button2, Button } = runInjectIdCode(
       `
 import * as React from 'react'
 export const Button = (props) => <div></div>
-export class Button2 extends React.Component {
+export default class Button2 extends React.Component {
     render() {
         return <div >hahaha</div>
     }

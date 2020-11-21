@@ -31,6 +31,7 @@ export type CreateDecorateVisitorOpts = Partial<CreateDisabledScopesOptions> & {
   ExportDefaultDeclaration?: boolean
   ExportNamedDeclaration?: boolean
   decorateLibPath?: string
+  importType?: 'namespace' | 'default'
   defaultEnable?: boolean
   moduleInteropPath?: string
 }
@@ -59,18 +60,25 @@ export class RangesHelper {
     }
     decorated.push(this.opts.libPath)
 
-    if (!this.importName) {
+    let importName = this.importName
+
+    if (!importName) {
       const moduleInteropPath = this.opts.moduleInteropPath
-      this.importName = addDefault(path, this.opts.libPath)
+      if (this.opts.importType === 'namespace') {
+        this.importName = addNamespace(path, this.opts.libPath, { nameHint: 'decorate' })
+      } else {
+        this.importName = addDefault(path, this.opts.libPath, { nameHint: 'decorate' })
+      }
 
       if (moduleInteropPath) {
         const moduleInterop = addDefault(path, moduleInteropPath)
         this.importName = types.callExpression(moduleInterop, [this.importName])
       }
+      importName = this.importName
+    } else {
+      importName = types.cloneDeep(this.importName)
     }
     // this.importName
-    const importName = this.importName
-
     if (transformData) {
       data = transformData(data, path, this)
     }
@@ -121,6 +129,7 @@ function createDecorateVisitor({
   exportVisitorTypes = ['ExportDefaultDeclaration', 'ExportNamedDeclaration'],
   defaultEnable = true,
   transformData,
+  importType = 'default',
   ...opts
 }: CreateDecorateVisitorOpts = {}) {
   if (!prefix) {
@@ -162,6 +171,7 @@ function createDecorateVisitor({
   return {
     Program(path) {
       const helper = new RangesHelper({
+        importType,
         moduleInteropPath,
         libPath: decorateLibPath,
         defaultEnable

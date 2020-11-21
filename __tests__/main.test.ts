@@ -61,9 +61,9 @@ describe('createDecorateReactVisitor', function () {
         }
       })
     ).toMatchInlineSnapshot(`
-      "import _default from \\"/decorateLibPath/\\";
+      "import _decorate from \\"/decorateLibPath/\\";
       import * as React from 'react';
-      export default @_default(\\"button.js\\")
+      export default @_decorate(\\"button.js\\")
       class Button extends React.Component {
         render() {
           return null;
@@ -111,23 +111,23 @@ export default class XButton extends Component {
 }
 `)
     ).toMatchInlineSnapshot(`
-      "import _default from \\"/decorateLibPath/\\";
+      "import _decorate from \\"/decorateLibPath/\\";
 
       const fn = a => a;
 
-      export const x = fn(_default(null)(class Button extends React.Component {
+      export const x = fn(_decorate(null)(class Button extends React.Component {
         render() {
           return null;
         }
 
       }));
 
-      const n = _default(null)(() => {
+      const n = _decorate(null)(() => {
         return <div></div>;
       });
 
       export const xx = n(function b() {});
-      export default @_default(null)
+      export default @_decorate(null)
       class XButton extends Component {
         render() {
           return null;
@@ -165,13 +165,13 @@ const Button4 = () => {
         }
       )
     ).toMatchInlineSnapshot(`
-      "import _default from \\"/decorateLibPath/\\";
+      "import _decorate from \\"/decorateLibPath/\\";
 
-      const Button = _default(null)(() => {
+      const Button = _decorate(null)(() => {
         return <div>hh</div>;
       });
 
-      const Button2 = _default(null)(() => {
+      const Button2 = _decorate(null)(() => {
         const [hh] = React.useState([1, 2]);
         return null;
       });
@@ -212,14 +212,14 @@ const Button2 = () => {
         }
       )
     ).toMatchInlineSnapshot(`
-      "import _default from \\"/decorateLibPath/\\";
+      "import _decorate from \\"/decorateLibPath/\\";
 
       const Button = () => {
         return <div>hh</div>;
       }; // react-enable-next-line {\\"id\\": \\"tmp\\"}
 
 
-      const Button2 = _default({
+      const Button2 = _decorate({
         \\"id\\": \\"tmp\\"
       })(() => {
         const [hh] = React.useState([1, 2]);
@@ -263,11 +263,11 @@ const Button3 = () => {
         }
       )
     ).toMatchInlineSnapshot(`
-      "import _default from \\"/decorateLibPath/\\";
+      "import _decorate from \\"/decorateLibPath/\\";
 
       const Button = () => {
         // jsx-enable-next-line [1, 2]
-        return _default([1, 2])(<div>
+        return _decorate([1, 2])(<div>
         <div>
         <div>hh</div>
           </div>
