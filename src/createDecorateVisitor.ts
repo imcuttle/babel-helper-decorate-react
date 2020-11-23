@@ -90,8 +90,6 @@ export class RangesHelper {
     } else {
       path.replaceWith(types.callExpression(types.callExpression(importName, [dataExp]), [path.node]))
     }
-
-    path.skip()
   }
 
   getEnableOptions(line: number) {
@@ -144,6 +142,7 @@ function createDecorateVisitor({
       if (typeof name === 'string') {
         acc[name] = function (path, { helper }) {
           helper.inject(path)
+          path.skip()
         }
       } else {
         acc[name.type] = function (path, { helper }) {
@@ -153,6 +152,7 @@ function createDecorateVisitor({
           } else if (name.condition(path, helper.babelPass, helper)) {
             helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
           }
+          path.skip()
         }
       }
       return acc
@@ -164,6 +164,7 @@ function createDecorateVisitor({
   let exportVisitors = exportVisitorTypes.reduce((acc: any, name) => {
     acc[name] = function (path, state) {
       path.traverse(deepVisitors, state)
+      path.skip()
     }
     return acc
   }, {})
