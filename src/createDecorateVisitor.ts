@@ -11,17 +11,17 @@ export type TransformDataFn = (
   helper: RangesHelper
 ) => any
 
-export type VisitorConfig =
-  | string
-  | {
-      type: string
-      condition?: (
-        path: import('@babel/traverse').NodePath,
-        babelPluginPass: import('@babel/core').PluginPass,
-        helper: RangesHelper
-      ) => boolean
-      transformData?: TransformDataFn
-    }
+export type StrictVisitorConfig = {
+  type: string
+  condition?: (
+    path: import('@babel/traverse').NodePath,
+    babelPluginPass: import('@babel/core').PluginPass,
+    helper: RangesHelper
+  ) => boolean
+  transformData?: TransformDataFn
+}
+
+export type VisitorConfig = string | StrictVisitorConfig
 
 export type CreateDecorateVisitorOpts = Partial<CreateDisabledScopesOptions> & {
   visitorTypes?: VisitorConfig[]

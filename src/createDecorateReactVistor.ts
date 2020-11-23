@@ -1,4 +1,9 @@
-import createDecorateVisitor, { CreateDecorateVisitorOpts } from './createDecorateVisitor'
+import createDecorateVisitor, {
+  CreateDecorateVisitorOpts,
+  RangesHelper,
+  StrictVisitorConfig,
+  VisitorConfig
+} from './createDecorateVisitor'
 
 const isMemberExpression = (path, name: string) => {
   return String(path) === name
@@ -61,8 +66,10 @@ function createDecorateReactVisitor({
   reactClassMemberTokens = defaultReactClassMemberTokens,
   detectClassComponent = true,
   detectFunctionComponent = true,
+
+  condition,
   ...options
-}: Omit<CreateDecorateVisitorOpts, 'visitorTypes'> & {
+}: Omit<CreateDecorateVisitorOpts, 'visitorTypes'> & { condition?: StrictVisitorConfig['condition'] } & {
   reactClassSuperTokens?: string[]
   reactClassMethodsTokens?: string[]
   reactClassCallTokens?: string[]
@@ -80,7 +87,13 @@ function createDecorateReactVisitor({
     .filter(Boolean)
     .map((name) => ({
       type: name,
-      condition: (path, helper) => {
+      condition: (path, a, b) => {
+        if (condition) {
+          if (false === condition(path, a, b)) {
+            return false
+          }
+        }
+
         let isMatched = false
         if (name === 'ClassExpression|ClassDeclaration') {
           if (reactClassSuperTokens.some((token) => isMemberExpression(path.get('superClass'), token))) {

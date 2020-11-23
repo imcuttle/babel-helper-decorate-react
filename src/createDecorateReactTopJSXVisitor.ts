@@ -1,17 +1,26 @@
 import * as types from '@babel/types'
-import createDecorateVisitor, { CreateDecorateVisitorOpts } from './createDecorateVisitor'
+import createDecorateVisitor, { CreateDecorateVisitorOpts, StrictVisitorConfig } from './createDecorateVisitor'
 
 function createDecorateReactTopJSXVisitor({
   detectClassComponent = true,
   detectFunctionComponent = true,
+  condition,
   ...options
 }: CreateDecorateVisitorOpts & {
   detectClassComponent?: boolean
   detectFunctionComponent?: boolean
+
+  condition?: StrictVisitorConfig['condition']
 }) {
   const vTypes = ['JSXElement'].map((name) => ({
     type: name,
-    condition: (path, helper) => {
+    condition: (path, a, b) => {
+      if (condition) {
+        if (false === condition(path, a, b)) {
+          return false
+        }
+      }
+
       if (!path.parent) {
         return false
       }
