@@ -242,6 +242,24 @@ you can use `// decorate-enable-next-line` to enable when is disabled by default
 - **Type:** `boolean`
 - **Default:** `true`
 
+##### `detectScopeDepth`
+
+The visitorType matched scope depth.  
+`-1` means allow any depth.
+
+```jsx
+const Button = () => {
+  // scope depth: 2
+  const Inner = () => <button>inner</button>
+
+  // scope depth: 1
+  return <button>123</button>
+}
+```
+
+- **Type:** `number`
+- **Default:** `-1`
+
 ## Contributing
 
 - Fork it!

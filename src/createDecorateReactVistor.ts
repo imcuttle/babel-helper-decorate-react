@@ -165,6 +165,7 @@ function createDecorateReactVisitor({
   return createDecorateVisitor({
     deepVisitorTypes: vTypes,
     visitorTypes: vTypes,
+    detectScopeDepth: 1,
     ...options
   })
 }

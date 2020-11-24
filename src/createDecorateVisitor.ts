@@ -31,6 +31,7 @@ export type CreateDecorateVisitorOpts = Partial<CreateDisabledScopesOptions> & {
   ExportDefaultDeclaration?: boolean
   ExportNamedDeclaration?: boolean
   decorateLibPath?: string
+  detectScopeDepth?: number
   importType?: 'namespace' | 'default'
   defaultEnable?: boolean
   moduleInteropPath?: string
@@ -128,6 +129,7 @@ function createDecorateVisitor({
   defaultEnable = true,
   transformData,
   importType = 'default',
+  detectScopeDepth = -1,
   ...opts
 }: CreateDecorateVisitorOpts = {}) {
   if (!prefix) {
@@ -137,20 +139,41 @@ function createDecorateVisitor({
     throw new Error('`decorateLibPath` is required')
   }
 
+  const isScopeDepthPassed = (path) => {
+    if (detectScopeDepth < 0) {
+      return true
+    }
+
+    let t = detectScopeDepth
+    let scope = path.scope
+    do {
+      scope = scope.parent
+      if (t === 0 && !scope) {
+        return true
+      }
+      t--
+    } while (t >= 0 && scope)
+    return false
+  }
+
   const reduceVisitors = (types: VisitorConfig[]) =>
     types.reduce((acc: any, name) => {
       if (typeof name === 'string') {
         acc[name] = function (path, { helper }) {
-          helper.inject(path)
+          if (isScopeDepthPassed(path)) {
+            helper.inject(path)
+          }
           path.skip()
         }
       } else {
         acc[name.type] = function (path, { helper }) {
           const transform = name.transformData || transformData
-          if (!name.condition) {
-            helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
-          } else if (name.condition(path, helper.babelPass, helper)) {
-            helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
+          if (isScopeDepthPassed(path)) {
+            if (!name.condition) {
+              helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
+            } else if (name.condition(path, helper.babelPass, helper)) {
+              helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
+            }
           }
           path.skip()
         }
