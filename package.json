@@ -28,6 +28,7 @@
     "node": ">=10"
   },
   "files": [
+    "plugin",
     "mobx",
     "es",
     "types",
