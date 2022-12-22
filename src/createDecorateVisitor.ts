@@ -3,6 +3,7 @@ import tpl from '@babel/template'
 import { addDefault, addNamespace } from '@babel/helper-module-imports'
 
 import parseCommentsRanges, { CreateDisabledScopesOptions } from './parseCommentsRanges'
+import { isScopeDepthPassed } from './utils'
 
 export type TransformDataFn = (
   data: any,
@@ -139,28 +140,11 @@ function createDecorateVisitor({
     throw new Error('`decorateLibPath` is required')
   }
 
-  const isScopeDepthPassed = (path) => {
-    if (detectScopeDepth < 0) {
-      return true
-    }
-
-    let t = detectScopeDepth
-    let scope = path.scope
-    do {
-      scope = scope.parent
-      if (t === 0 && !scope) {
-        return true
-      }
-      t--
-    } while (t >= 0 && scope)
-    return false
-  }
-
   const reduceVisitors = (types: VisitorConfig[]) =>
     types.reduce((acc: any, name) => {
       if (typeof name === 'string') {
         acc[name] = function (path, { helper }) {
-          if (isScopeDepthPassed(path)) {
+          if (isScopeDepthPassed(path, detectScopeDepth)) {
             helper.inject(path)
           }
           path.skip()
@@ -168,7 +152,7 @@ function createDecorateVisitor({
       } else {
         acc[name.type] = function (path, { helper }) {
           const transform = name.transformData || transformData
-          if (isScopeDepthPassed(path)) {
+          if (isScopeDepthPassed(path, detectScopeDepth)) {
             if (!name.condition) {
               helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
             } else if (name.condition(path, helper.babelPass, helper)) {

@@ -4,6 +4,7 @@ import createDecorateVisitor, {
   StrictVisitorConfig,
   VisitorConfig
 } from './createDecorateVisitor'
+import { isScopeDepthPassed } from './utils'
 
 const isMemberExpression = (path, name: string) => {
   return String(path) === name
@@ -79,6 +80,11 @@ function createDecorateReactVisitor({
   detectClassComponent?: boolean
   detectFunctionComponent?: boolean
 }) {
+  const mergedOptions = {
+    detectScopeDepth: 1,
+    ...options
+  }
+
   const vTypes = [
     detectFunctionComponent && 'FunctionExpression',
     detectFunctionComponent && 'ArrowFunctionExpression',
@@ -96,64 +102,90 @@ function createDecorateReactVisitor({
 
         let isMatched = false
         if (name === 'ClassExpression|ClassDeclaration') {
-          if (reactClassSuperTokens.some((token) => isMemberExpression(path.get('superClass'), token))) {
+          if (
+            isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
+            reactClassSuperTokens.some((token) => isMemberExpression(path.get('superClass'), token))
+          ) {
             path.stop()
             return true
           }
 
           path.traverse({
             ClassMethod(path) {
-              if (reactClassMethodsTokens.some((token) => isMemberExpression(path.get('key'), token))) {
+              if (
+                isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
+                reactClassMethodsTokens.some((token) => isMemberExpression(path.get('key'), token))
+              ) {
                 isMatched = true
                 path.stop()
               }
             },
             CallExpression(path) {
-              if (reactClassCallTokens.some((token) => isMemberExpression(path.get('callee'), token))) {
+              if (
+                isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
+                reactClassCallTokens.some((token) => isMemberExpression(path.get('callee'), token))
+              ) {
                 isMatched = true
                 path.stop()
               }
             },
             // @ts-ignore
             ['MemberExpression|Identifier'](path) {
-              if (reactClassMemberTokens.some((token) => isMemberExpression(path, token))) {
+              if (
+                isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
+                reactClassMemberTokens.some((token) => isMemberExpression(path, token))
+              ) {
                 isMatched = true
                 path.stop()
               }
               path.skip()
             },
             JSXElement(path) {
-              isMatched = true
-              path.stop()
+              if (isScopeDepthPassed(path, mergedOptions.detectScopeDepth)) {
+                isMatched = true
+                path.stop()
+              }
             },
             JSXFragment(path) {
-              isMatched = true
-              path.stop()
+              if (isScopeDepthPassed(path, mergedOptions.detectScopeDepth)) {
+                isMatched = true
+                path.stop()
+              }
             }
           })
         } else {
           path.traverse({
             CallExpression(path) {
-              if (reactFunctionCallTokens.some((token) => isMemberExpression(path.get('callee'), token))) {
+              if (
+                isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
+                reactFunctionCallTokens.some((token) => isMemberExpression(path.get('callee'), token))
+              ) {
                 isMatched = true
                 path.stop()
               }
             },
             // @ts-ignore
             ['MemberExpression|Identifier'](path) {
-              if (reactClassMemberTokens.some((token) => isMemberExpression(path, token))) {
+              if (
+                isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
+                reactClassMemberTokens.some((token) => isMemberExpression(path, token))
+              ) {
                 isMatched = true
                 path.stop()
               }
               path.skip()
             },
             JSXElement(path) {
-              isMatched = true
-              path.stop()
+              if (isScopeDepthPassed(path, mergedOptions.detectScopeDepth)) {
+                isMatched = true
+                path.stop()
+              }
             },
             JSXFragment(path) {
-              isMatched = true
-              path.stop()
+              if (isScopeDepthPassed(path, mergedOptions.detectScopeDepth)) {
+                isMatched = true
+                path.stop()
+              }
             }
           })
         }
@@ -162,12 +194,7 @@ function createDecorateReactVisitor({
       }
     }))
 
-  return createDecorateVisitor({
-    deepVisitorTypes: vTypes,
-    visitorTypes: vTypes,
-    detectScopeDepth: 1,
-    ...options
-  })
+  return createDecorateVisitor({ deepVisitorTypes: vTypes, visitorTypes: vTypes, ...mergedOptions })
 }
 
 export default createDecorateReactVisitor

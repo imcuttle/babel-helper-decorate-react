@@ -33,7 +33,11 @@ const visit = (code, opts?: Parameters<typeof createDecorateReactVisitor>[0]) =>
         manipulateOptions(opts: any, parserOpts: any): void {
           parserOpts.plugins.push('jsx', 'decorators-legacy')
         },
-        visitor: createDecorateReactVisitor({ moduleInteropPath: null, decorateLibPath: '/decorateLibPath/', ...opts })
+        visitor: createDecorateReactVisitor({
+          moduleInteropPath: null,
+          decorateLibPath: '/decorateLibPath/',
+          ...opts
+        })
       }
     ]
   }).code
@@ -84,6 +88,30 @@ const Button2 = () => {};
       "const Button = () => {};
 
       const Button2 = () => {};"
+    `)
+  })
+
+  it('Decorate Component', function () {
+    expect(
+      visit(
+        `export default (meta) => {
+      return () => {
+        return React.forwardRef(() => {
+          React.useEffect(() => {
+          }, []);
+        });
+      }
+      }`,
+        { detectScopeDepth: 1 }
+      )
+    ).toMatchInlineSnapshot(`
+      "export default (meta => {
+        return () => {
+          return React.forwardRef(() => {
+            React.useEffect(() => {}, []);
+          });
+        };
+      });"
     `)
   })
 
