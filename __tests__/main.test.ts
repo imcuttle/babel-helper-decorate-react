@@ -78,17 +78,17 @@ describe('createDecorateReactVisitor', function () {
   })
 
   it('Function Component', function () {
-    //     expect(
-    //       visit(
-    //         `const Button = () => {};
-    // const Button2 = () => {};
-    // `
-    //       )
-    //     ).toMatchInlineSnapshot(`
-    //       "const Button = () => {};
-    //
-    //       const Button2 = () => {};"
-    //     `)
+    expect(
+      visit(
+        `const Button = () => {};
+    const Button2 = () => {};
+    `
+      )
+    ).toMatchInlineSnapshot(`
+          "const Button = () => {};
+
+          const Button2 = () => {};"
+        `)
 
     expect(
       visit(
@@ -118,6 +118,14 @@ const Button3 = React.memo(() => {
 const useButton2 = () => {
   return <div></div>
 };
+
+export default function AppDefault() {
+    return <div></div>
+}
+
+export function App() {
+    return <div></div>
+}
 `
       )
     ).toMatchInlineSnapshot(`
@@ -151,7 +159,16 @@ const useButton2 = () => {
 
       const useButton2 = () => {
         return <div></div>;
-      };"
+      };
+
+      const AppDefault = _decorate(null)(function AppDefault() {
+        return <div></div>;
+      });
+
+      export default AppDefault;
+      export const App = _decorate(null)(function App() {
+        return <div></div>;
+      });"
     `)
   })
 

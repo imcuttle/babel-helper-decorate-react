@@ -22,7 +22,9 @@ const projectRoot = nps.join(__dirname, '..')
 describe('demo', () => {
   const root = nps.join(__dirname, 'lib')
 
-  fs.readdirSync(root).forEach((name) => {
+  const cases = fs.readdirSync(root)
+  // const cases = ['mobx']
+  cases.forEach((name) => {
     // fs.readFileSync(, 'utf8')
     // fs.readFileSync(nps.join(__dirname, name, 'index.js'), 'utf8')
     // code
@@ -31,11 +33,12 @@ describe('demo', () => {
     names.forEach((subName) => {
       it(`demo-${name}`, () => {
         const output = babel.transformFileSync(nps.join(dir, subName), {
-          presets: ['@babel/react', '@babel/env'],
+          presets: ['@babel/react', '@babel/env', '@babel/typescript'],
           plugins: [nps.join(root, name, 'index.js'), ['@babel/plugin-proposal-decorators', { legacy: true }]]
         }).code
 
         const es6Output = babel.transformFileSync(nps.join(dir, subName), {
+          presets: ['@babel/typescript'],
           plugins: [nps.join(root, name, 'index.js'), '@babel/plugin-syntax-jsx']
         }).code
 

@@ -10,7 +10,7 @@ export default class ButtonExportDefault extends React.Component {
   }
 }
 
-/* mobx-decorate-disable */
+/* mobx-observer-disable */
 export function Test() {
   return (
     <div>

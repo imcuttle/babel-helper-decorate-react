@@ -46,7 +46,7 @@ export class RangesHelper {
 
   constructor(public opts: any) {}
 
-  public matched(path: import('@babel/traverse').NodePath) {
+  public getLocation(path: import('@babel/traverse').NodePath) {
     let loc = path.node.loc
     let tmp = path
     while (!loc && tmp) {
@@ -58,7 +58,11 @@ export class RangesHelper {
       loc = tmp?.node?.loc
     }
 
-    return this.getEnableOptions(loc.start.line)
+    return loc
+  }
+
+  public matched(path: import('@babel/traverse').NodePath) {
+    return this.getEnableOptions(this.getLocation(path).start.line)
   }
 
   public inject(path: import('@babel/traverse').NodePath, transformData?: any) {
