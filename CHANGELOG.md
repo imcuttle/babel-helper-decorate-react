@@ -1,3 +1,5 @@
+## [1.1.2](https://github.com/余聪/babel-helper-decorate-react/compare/v1.1.1...v1.1.2) (2022-12-23)
+
 ## [1.1.1](https://github.com/余聪/babel-helper-decorate-react/compare/v1.1.0...v1.1.1) (2022-12-22)
 
 # [1.1.0](https://github.com/余聪/babel-helper-decorate-react/compare/v1.0.6...v1.1.0) (2022-12-22)
