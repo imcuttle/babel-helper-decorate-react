@@ -18,7 +18,7 @@ export type StrictVisitorConfig = {
     path: import('@babel/traverse').NodePath,
     babelPluginPass: import('@babel/core').PluginPass,
     helper: RangesHelper
-  ) => boolean
+  ) => boolean | 'noSkip'
   transformData?: TransformDataFn
 }
 
@@ -46,8 +46,23 @@ export class RangesHelper {
 
   constructor(public opts: any) {}
 
-  inject(path, transformData?: any) {
-    let { matched, data } = this.getEnableOptions(path.node.loc.start.line)
+  public matched(path: import('@babel/traverse').NodePath) {
+    let loc = path.node.loc
+    let tmp = path
+    while (!loc && tmp) {
+      // @ts-ignore
+      tmp = tmp.getPrevSibling()
+      if (!tmp?.node) {
+        tmp = tmp.parentPath
+      }
+      loc = tmp?.node?.loc
+    }
+
+    return this.getEnableOptions(loc.start.line)
+  }
+
+  public inject(path: import('@babel/traverse').NodePath, transformData?: any) {
+    let { matched, data } = this.matched(path)
     if (!matched) {
       return false
     }
@@ -90,6 +105,7 @@ export class RangesHelper {
       path.node.decorators = path.node.decorators || []
       path.node.decorators.push(types.decorator(types.callExpression(importName, [dataExp])))
     } else {
+      // @ts-ignore
       path.replaceWith(types.callExpression(types.callExpression(importName, [dataExp]), [path.node]))
     }
   }
@@ -152,14 +168,21 @@ function createDecorateVisitor({
       } else {
         acc[name.type] = function (path, { helper }) {
           const transform = name.transformData || transformData
+          let rlt: boolean | 'noSkip'
           if (isScopeDepthPassed(path, detectScopeDepth)) {
             if (!name.condition) {
               helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
-            } else if (name.condition(path, helper.babelPass, helper)) {
+            } else if (
+              helper.matched(path)?.matched &&
+              (rlt = name.condition(path, helper.babelPass, helper)) &&
+              rlt === true
+            ) {
               helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
             }
           }
-          path.skip()
+          if (rlt !== 'noSkip') {
+            path.skip()
+          }
         }
       }
       return acc

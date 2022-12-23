@@ -78,16 +78,80 @@ describe('createDecorateReactVisitor', function () {
   })
 
   it('Function Component', function () {
+    //     expect(
+    //       visit(
+    //         `const Button = () => {};
+    // const Button2 = () => {};
+    // `
+    //       )
+    //     ).toMatchInlineSnapshot(`
+    //       "const Button = () => {};
+    //
+    //       const Button2 = () => {};"
+    //     `)
+
     expect(
       visit(
-        `const Button = () => {};
-const Button2 = () => {};
+        `const useXX = () => {
+          React.useEffect(() => {}, [])
+        };
+const RectArea = function(width, height) {
+  return <div></div>;
+};
+
+const RectArea2 = function() {
+  return <div></div>;
+};
+
+function RectArea3() {
+  return <div></div>;
+};
+
+const Button2 = () => {
+  return <div></div>
+};
+
+const Button3 = React.memo(() => {
+  return <div></div>
+});
+
+const useButton2 = () => {
+  return <div></div>
+};
 `
       )
     ).toMatchInlineSnapshot(`
-      "const Button = () => {};
+      "import _decorate from \\"/decorateLibPath/\\";
 
-      const Button2 = () => {};"
+      const useXX = () => {
+        React.useEffect(() => {}, []);
+      };
+
+      const RectArea = _decorate(null)(function (width, height) {
+        return <div></div>;
+      });
+
+      const RectArea2 = _decorate(null)(function () {
+        return <div></div>;
+      });
+
+      const RectArea3 = _decorate(null)(function RectArea3() {
+        return <div></div>;
+      });
+
+      ;
+
+      const Button2 = _decorate(null)(() => {
+        return <div></div>;
+      });
+
+      const Button3 = React.memo(_decorate(null)(() => {
+        return <div></div>;
+      }));
+
+      const useButton2 = () => {
+        return <div></div>;
+      };"
     `)
   })
 
@@ -151,9 +215,9 @@ export default @noop class XButton extends Component {
 
       }));
 
-      const n = _decorate(null)(() => {
+      const n = () => {
         return <div></div>;
-      });
+      };
 
       export const xx = n(function b() {});
       export default @noop

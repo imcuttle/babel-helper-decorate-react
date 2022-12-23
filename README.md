@@ -148,6 +148,14 @@ babel.transform(code, {
 
 extends [createDecorateVisitor#Options](#options-1)
 
+##### `detectComponentName`
+
+Should detect react component name?
+`App` is valid, `app` is invalid.
+
+- **Type:** `boolean`
+- **Default:** `true`
+
 ##### `detectClassComponent`
 
 Should detect react class component?
