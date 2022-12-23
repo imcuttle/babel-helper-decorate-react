@@ -7,7 +7,6 @@ import { getGlobalStore } from '@ecom/hulk-utils/src/store'
 import { sendEvent } from '@ecom/hulk-utils/src/tea'
 import { useContextStore } from '@ecom/mortise/YStore'
 
-import Search from '../../../components/search'
 import { UnionIcon } from '../../../static/icon'
 import DouXiaoerStore from '../../../store'
 import { CommonStyle, IDouXiaoerContent, IHeadInfo } from '../../../type'

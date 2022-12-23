@@ -1,4 +1,5 @@
 const createDecorateReactVisitor = require('../../../src').default
+const nps = require('path')
 
 module.exports = function reactDecoratePlugin() {
   return {
@@ -9,7 +10,7 @@ module.exports = function reactDecoratePlugin() {
           detectClassComponent: true,
           moduleInteropPath: null,
           detectFunctionComponent: true,
-          decorateLibPath: '/lib/',
+          decorateLibPath: nps.join(__dirname, 'react.js'),
           detectScopeDepth: 1,
           transformData: (data, path1, babelPluginPass, helper) => {
             return {
@@ -25,3 +26,5 @@ module.exports = function reactDecoratePlugin() {
     }
   }
 }
+
+module.exports.runCode = false

@@ -49,9 +49,11 @@ describe('demo', () => {
           `DemoCode-${name}-${subName}`
         )
 
-        const { Test } = runCode(output)
-        const test = TestRenderer.create(<Test />)
-        expect(test.toJSON()).toMatchSnapshot(`DemoOutput-${name}-${subName}`)
+        if (require(nps.join(root, name, 'index.js')).runCode !== false) {
+          const { Test } = runCode(output)
+          const test = TestRenderer.create(<Test />)
+          expect(test.toJSON()).toMatchSnapshot(`DemoOutput-${name}-${subName}`)
+        }
       })
     })
   })
