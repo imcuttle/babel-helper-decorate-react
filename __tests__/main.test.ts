@@ -172,6 +172,46 @@ export function App() {
     `)
   })
 
+  it('Eval Data', function () {
+    expect(
+      visit(
+        `const Button = () => <div></div>;
+    `,
+        {
+          transformData(_, __, ___, helper) {
+            return helper.eval('module')
+          }
+        }
+      )
+    ).toMatchInlineSnapshot(`
+      "import _decorate from \\"/decorateLibPath/\\";
+
+      const Button = _decorate(module)(() => <div></div>);"
+    `)
+
+    expect(
+      visit(
+        `const Button = () => <div></div>;
+    `,
+        {
+          transformData(_, __, ___, helper) {
+            return {
+              module: helper.eval('module'),
+              modules: [helper.eval('module'), helper.eval('module')]
+            }
+          }
+        }
+      )
+    ).toMatchInlineSnapshot(`
+      "import _decorate from \\"/decorateLibPath/\\";
+
+      const Button = _decorate({
+        \\"module\\": module,
+        \\"modules\\": [module, module]
+      })(() => <div></div>);"
+    `)
+  })
+
   it('Decorate Component', function () {
     expect(
       visit(

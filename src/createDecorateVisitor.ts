@@ -61,6 +61,10 @@ export class RangesHelper {
     return loc
   }
 
+  public eval(content: string) {
+    return `__$$EVAL%%${content}%%__`
+  }
+
   public matched(path: import('@babel/traverse').NodePath) {
     return this.getEnableOptions(this.getLocation(path).start.line)
   }
@@ -104,7 +108,7 @@ export class RangesHelper {
       data = transformData(data, path, this)
     }
 
-    let dataExp = tpl.expression(JSON.stringify(data || null))()
+    let dataExp = tpl.expression(JSON.stringify(data || null).replace(/"__\$\$EVAL%%(.*?)%%__"/g, '$1'))()
     if ('ClassDeclaration' === path.node.type) {
       path.node.decorators = path.node.decorators || []
       path.node.decorators.push(types.decorator(types.callExpression(importName, [dataExp])))
