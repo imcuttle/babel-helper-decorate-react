@@ -14,9 +14,9 @@ function createDecorateReactTopJSXVisitor({
 }) {
   const vTypes = ['JSXElement'].map((name) => ({
     type: name,
-    condition: (path, a, b) => {
+    condition: (path, a, b, c) => {
       if (condition) {
-        if (false === condition(path, a, b)) {
+        if (false === condition(path, a, b, c)) {
           return false
         }
       }

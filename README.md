@@ -268,6 +268,29 @@ const Button = () => {
 - **Type:** `number`
 - **Default:** `-1`
 
+##### `wrapFunctionComponentDecorateTokens`
+
+should wrap function component decorator
+
+```jsx
+// Input
+const Button = forwardRef(() => {
+  // scope depth: 1
+  return <button>123</button>
+})
+
+// Output
+const Button = decorate()(
+  forwardRef(() => {
+    // scope depth: 1
+    return <button>123</button>
+  })
+)
+```
+
+- **Type:** `string[]`
+- **Default:** `['forwardRef', 'React.forwardRef']`
+
 ## Contributing
 
 - Fork it!

@@ -95,13 +95,13 @@ describe('createDecorateReactVisitor', function () {
         `const useXX = () => {
           React.useEffect(() => {}, [])
         };
-const RectArea = function(width, height) {
+const RectArea = abc(function(width, height) {
   return <div></div>;
-};
+});
 
-const RectArea2 = function() {
+const RectArea2 = forwardRef(function() {
   return <div></div>;
-};
+});
 
 function RectArea3() {
   return <div></div>;
@@ -126,7 +126,10 @@ export default function AppDefault() {
 export function App() {
     return <div></div>
 }
-`
+`,
+        {
+          wrapFunctionComponentDecorateTokens: ['forwardRef']
+        }
       )
     ).toMatchInlineSnapshot(`
       "import _decorate from \\"/decorateLibPath/\\";
@@ -135,13 +138,13 @@ export function App() {
         React.useEffect(() => {}, []);
       };
 
-      const RectArea = _decorate(null)(function (width, height) {
+      const RectArea = abc(_decorate(null)(function (width, height) {
         return <div></div>;
-      });
+      }));
 
-      const RectArea2 = _decorate(null)(function () {
+      const RectArea2 = _decorate(null)(forwardRef(function () {
         return <div></div>;
-      });
+      }));
 
       const RectArea3 = _decorate(null)(function RectArea3() {
         return <div></div>;

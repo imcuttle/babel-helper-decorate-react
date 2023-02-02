@@ -2,8 +2,16 @@ import createDecorateVisitor, { CreateDecorateVisitorOpts, StrictVisitorConfig }
 import { isScopeDepthPassed, replaceAdvancedWith } from './utils'
 import * as t from '@babel/types'
 
-const isMemberExpression = (path, name: string) => {
-  return String(path) === name
+export type TokenRuleType = string | RegExp | ((path: import('@babel/core').NodePath) => boolean)
+
+const isMemberExpression = (path: import('@babel/core').NodePath, name: TokenRuleType) => {
+  if (typeof name === 'string') {
+    return String(path) === name
+  }
+  if (typeof name === 'function') {
+    return name(path)
+  }
+  return name.test(String(path))
 }
 
 export const defaultReactClassMethodsTokens = [
@@ -87,6 +95,7 @@ function createDecorateReactVisitor({
   reactClassCallTokens = defaultReactClassCallTokens,
   reactFunctionCallTokens = defaultReactFunctionCallTokens,
   reactClassMemberTokens = defaultReactClassMemberTokens,
+  wrapFunctionComponentDecorateTokens = ['React.forwardRef', 'forwardRef'],
   detectClassComponent = true,
   detectFunctionComponent = true,
   detectComponentName = true,
@@ -94,11 +103,12 @@ function createDecorateReactVisitor({
   condition,
   ...options
 }: Omit<CreateDecorateVisitorOpts, 'visitorTypes'> & { condition?: StrictVisitorConfig['condition'] } & {
-  reactClassSuperTokens?: string[]
-  reactClassMethodsTokens?: string[]
-  reactClassCallTokens?: string[]
-  reactClassMemberTokens?: string[]
-  reactFunctionCallTokens?: string[]
+  reactClassSuperTokens?: TokenRuleType[]
+  reactClassMethodsTokens?: TokenRuleType[]
+  reactClassCallTokens?: TokenRuleType[]
+  wrapFunctionComponentDecorateTokens?: TokenRuleType[]
+  reactClassMemberTokens?: TokenRuleType[]
+  reactFunctionCallTokens?: TokenRuleType[]
   detectClassComponent?: boolean
   detectComponentName?: boolean
   detectFunctionComponent?: boolean
@@ -155,9 +165,9 @@ function createDecorateReactVisitor({
     .filter(Boolean)
     .map((name) => ({
       type: name,
-      condition: (path: import('@babel/traverse').NodePath, a, b) => {
+      condition: (path: import('@babel/traverse').NodePath, a, b, api) => {
         if (condition) {
-          if (false === condition(path, a, b)) {
+          if (false === condition(path, a, b, api)) {
             return false
           }
         }
@@ -166,7 +176,7 @@ function createDecorateReactVisitor({
         if (name === 'ClassExpression|ClassDeclaration') {
           if (
             isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
-            reactClassSuperTokens.some((token) => isMemberExpression(path.get('superClass'), token))
+            reactClassSuperTokens.some((token) => isMemberExpression(path.get('superClass') as any, token))
           ) {
             path.stop()
             return true
@@ -176,7 +186,7 @@ function createDecorateReactVisitor({
             ClassMethod(path) {
               if (
                 isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
-                reactClassMethodsTokens.some((token) => isMemberExpression(path.get('key'), token))
+                reactClassMethodsTokens.some((token) => isMemberExpression(path.get('key') as any, token))
               ) {
                 isMatched = true
                 path.stop()
@@ -185,7 +195,7 @@ function createDecorateReactVisitor({
             CallExpression(path) {
               if (
                 isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
-                reactClassCallTokens.some((token) => isMemberExpression(path.get('callee'), token))
+                reactClassCallTokens.some((token) => isMemberExpression(path.get('callee') as any, token))
               ) {
                 isMatched = true
                 path.stop()
@@ -262,7 +272,8 @@ function createDecorateReactVisitor({
             if (path.parent?.type === 'Program') {
               // @ts-ignore
               replaceAdvancedWith(path, getVariableDeclaration())
-              return 'noSkip'
+              api.noSkip()
+              return false
             }
 
             /**
@@ -276,7 +287,8 @@ function createDecorateReactVisitor({
              */
             if (path.parent?.type === 'ExportNamedDeclaration') {
               replaceAdvancedWith(path, getVariableDeclaration())
-              return 'noSkip'
+              api.noSkip()
+              return false
             }
 
             /**
@@ -293,7 +305,8 @@ function createDecorateReactVisitor({
               // @ts-ignore
               path.parentPath.insertBefore(getVariableDeclaration())
               replaceAdvancedWith(path, t.identifier(path.node.id.name))
-              return 'noSkip'
+              api.noSkip()
+              return false
             }
 
             return false
@@ -307,8 +320,19 @@ function createDecorateReactVisitor({
             return false
           }
 
-          return isReactInner(path)
-          // @ts-ignore
+          if (isReactInner(path)) {
+            const parentPath: any = path.parentPath
+            if (
+              parentPath.node?.type === 'CallExpression' &&
+              parentPath.node?.callee?.name &&
+              wrapFunctionComponentDecorateTokens.some((t) => isMemberExpression(parentPath.get('callee'), t))
+            ) {
+              api.wrap()
+              return true
+            }
+            return true
+          }
+          return false
         }
       }
     }))

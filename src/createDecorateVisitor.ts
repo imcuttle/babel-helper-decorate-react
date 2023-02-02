@@ -17,8 +17,9 @@ export type StrictVisitorConfig = {
   condition?: (
     path: import('@babel/traverse').NodePath,
     babelPluginPass: import('@babel/core').PluginPass,
-    helper: RangesHelper
-  ) => boolean | 'noSkip'
+    helper: RangesHelper,
+    walkApi: WalkApi
+  ) => boolean
   transformData?: TransformDataFn
 }
 
@@ -144,6 +145,31 @@ export class RangesHelper {
   }
 }
 
+type WalkStatus = 'noSkip' | 'wrap'
+class WalkApi {
+  statusList: Set<WalkStatus> = new Set()
+
+  addStatus(s: WalkStatus) {
+    return this.statusList.add(s)
+  }
+
+  removeStatus(s: WalkStatus) {
+    return this.statusList.delete(s)
+  }
+
+  hasStatus(s: WalkStatus) {
+    return this.statusList.has(s)
+  }
+
+  noSkip(f: boolean = true) {
+    f ? this.addStatus('noSkip') : this.removeStatus('noSkip')
+  }
+
+  wrap(f: boolean = true) {
+    f ? this.addStatus('wrap') : this.removeStatus('wrap')
+  }
+}
+
 function createDecorateVisitor({
   prefix = 'decorate',
   decorateLibPath,
@@ -176,19 +202,23 @@ function createDecorateVisitor({
       } else {
         acc[name.type] = function (path, { helper }) {
           const transform = name.transformData || transformData
-          let rlt: boolean | 'noSkip'
+
+          const walkApi = new WalkApi()
+          let rlt: boolean
           if (isScopeDepthPassed(path, detectScopeDepth)) {
             if (!name.condition) {
               helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
             } else if (
               helper.matched(path)?.matched &&
-              (rlt = name.condition(path, helper.babelPass, helper)) &&
+              (rlt = name.condition(path, helper.babelPass, helper, walkApi)) &&
               rlt === true
             ) {
-              helper.inject(path, (data) => (transform ? transform(data, path, helper.babelPass, helper) : data))
+              helper.inject(walkApi.hasStatus('wrap') ? path.parentPath : path, (data) =>
+                transform ? transform(data, path, helper.babelPass, helper) : data
+              )
             }
           }
-          if (rlt !== 'noSkip') {
+          if (!walkApi.hasStatus('noSkip')) {
             path.skip()
           }
         }
