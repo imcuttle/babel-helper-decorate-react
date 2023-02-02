@@ -1,3 +1,9 @@
+# [2.0.0](https://github.com/余聪/babel-helper-decorate-react/compare/v1.1.4...v2.0.0) (2023-02-02)
+
+### Features
+
+- add wrapFunctionComponentDecorateTokens ([8bcfe14](https://github.com/余聪/babel-helper-decorate-react/commit/8bcfe14ed7ef85c0a1a339d3ea834fea4ac3dcbf))
+
 ## [1.1.4](https://github.com/余聪/babel-helper-decorate-react/compare/v1.1.3...v1.1.4) (2022-12-23)
 
 ## [1.1.3](https://github.com/余聪/babel-helper-decorate-react/compare/v1.1.2...v1.1.3) (2022-12-23)
