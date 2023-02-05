@@ -1,3 +1,5 @@
+## [2.0.1](https://github.com/余聪/babel-helper-decorate-react/compare/v2.0.0...v2.0.1) (2023-02-05)
+
 # [2.0.0](https://github.com/余聪/babel-helper-decorate-react/compare/v1.1.4...v2.0.0) (2023-02-02)
 
 ### Features

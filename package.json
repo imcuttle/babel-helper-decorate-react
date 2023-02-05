@@ -1,6 +1,6 @@
 {
   "name": "babel-helper-decorate-react",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Babel Helper for custom decorator for React Component",
   "author": "余聪 <yucong06@meituan.com>",
   "scripts": {
