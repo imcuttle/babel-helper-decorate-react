@@ -174,6 +174,9 @@ function createDecorateReactVisitor({
 
         let isMatched = false
         if (name === 'ClassExpression|ClassDeclaration') {
+          if (!(path.get('superClass') as any)?.node) {
+            return false
+          }
           if (
             isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
             reactClassSuperTokens.some((token) => isMemberExpression(path.get('superClass') as any, token))
@@ -182,10 +185,22 @@ function createDecorateReactVisitor({
             return true
           }
 
+          const deltaDepth = (delta) => {
+            if (delta != null) {
+              return mergedOptions.detectScopeDepth != null
+                ? mergedOptions.detectScopeDepth < 0
+                  ? mergedOptions.detectScopeDepth
+                  : mergedOptions.detectScopeDepth + delta
+                : mergedOptions.detectScopeDepth
+            }
+            return mergedOptions.detectScopeDepth
+          }
+
           path.traverse({
             ClassMethod(path) {
+              // console.log(String(path.get('key')), reactClassMethodsTokens.some((token) => isMemberExpression(path.get('key') as any, token)))
               if (
-                isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
+                isScopeDepthPassed(path, deltaDepth(1)) &&
                 reactClassMethodsTokens.some((token) => isMemberExpression(path.get('key') as any, token))
               ) {
                 isMatched = true
@@ -194,7 +209,7 @@ function createDecorateReactVisitor({
             },
             CallExpression(path) {
               if (
-                isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
+                isScopeDepthPassed(path, deltaDepth(2)) &&
                 reactClassCallTokens.some((token) => isMemberExpression(path.get('callee') as any, token))
               ) {
                 isMatched = true
@@ -204,7 +219,7 @@ function createDecorateReactVisitor({
             // @ts-ignore
             ['MemberExpression|Identifier'](path) {
               if (
-                isScopeDepthPassed(path, mergedOptions.detectScopeDepth) &&
+                isScopeDepthPassed(path, deltaDepth(2)) &&
                 reactClassMemberTokens.some((token) => isMemberExpression(path, token))
               ) {
                 isMatched = true
@@ -213,18 +228,20 @@ function createDecorateReactVisitor({
               path.skip()
             },
             JSXElement(path) {
-              if (isScopeDepthPassed(path, mergedOptions.detectScopeDepth)) {
+              if (isScopeDepthPassed(path, deltaDepth(2))) {
                 isMatched = true
                 path.stop()
               }
             },
             JSXFragment(path) {
-              if (isScopeDepthPassed(path, mergedOptions.detectScopeDepth)) {
+              if (isScopeDepthPassed(path, deltaDepth(2))) {
                 isMatched = true
                 path.stop()
               }
             }
           })
+
+          return isMatched
         } else {
           // @ts-ignore
           if (path.node?.async || path.node?.generator) {
@@ -240,9 +257,10 @@ function createDecorateReactVisitor({
             (!detectComponentName || detectIsValidName(path))
           ) {
             const getVariableDeclarator = () => {
+              // path.opts
               return t.variableDeclarator(
                 // @ts-ignore
-                t.identifier(path.node.id.name),
+                t.identifier(path.node?.id?.name || '__unknow'),
                 t.functionExpression(
                   // @ts-ignore
                   path.node.id,

@@ -31,7 +31,7 @@ const visit = (code, opts?: Parameters<typeof createDecorateReactVisitor>[0]) =>
     plugins: [
       {
         manipulateOptions(opts: any, parserOpts: any): void {
-          parserOpts.plugins.push('jsx', 'decorators-legacy')
+          parserOpts.plugins.push('jsx', 'decorators-legacy', 'classProperties')
         },
         visitor: createDecorateReactVisitor({
           moduleInteropPath: null,
@@ -241,9 +241,9 @@ export function App() {
 
   it('Complex', function () {
     expect(
-      visit(`const fn = (a) => a
+      visit(`const fn = (a) => a;
 export const x = fn(class Button extends React.Component {
-  render() {
+  render = () => {
     return null;
   }
 })
@@ -269,10 +269,9 @@ export default @noop class XButton extends Component {
       const fn = a => a;
 
       export const x = fn(_decorate(null)(class Button extends React.Component {
-        render() {
+        render = () => {
           return null;
-        }
-
+        };
       }));
 
       const n = () => {
@@ -285,6 +284,26 @@ export default @noop class XButton extends Component {
       class XButton extends Component {
         render() {
           return null;
+        }
+
+      }"
+    `)
+  })
+
+  it('class mode', () => {
+    expect(
+      visit(`
+export class X {
+  render() {
+    return <div />
+  }
+}
+
+`)
+    ).toMatchInlineSnapshot(`
+      "export class X {
+        render() {
+          return <div />;
         }
 
       }"
