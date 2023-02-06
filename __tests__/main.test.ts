@@ -299,9 +299,22 @@ export class X {
   }
 }
 
+export default class extends Component {
+  render() {
+    return <div />
+  }
+}
 `)
     ).toMatchInlineSnapshot(`
-      "export class X {
+      "import _decorate from \\"/decorateLibPath/\\";
+      export class X {
+        render() {
+          return <div />;
+        }
+
+      }
+      export default @_decorate(null)
+      class extends Component {
         render() {
           return <div />;
         }
